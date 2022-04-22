@@ -139,7 +139,7 @@ static void machine_kexec_mask_interrupts(void)
 void machine_crash_shutdown(struct pt_regs *regs)
 {
 	local_irq_disable();
-	crash_smp_send_stop();
+	// crash_smp_send_stop();
 
 	crash_save_cpu(regs, smp_processor_id());
 	machine_kexec_mask_interrupts();

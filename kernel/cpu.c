@@ -1065,7 +1065,7 @@ static int takedown_cpu(unsigned int cpu)
 
 	hotplug_cpu__broadcast_tick_pull(cpu);
 	/* This actually kills the CPU. */
-	__cpu_die(cpu);
+	// __cpu_die(cpu);        // Don't kill this cpu. it's starting twin kernel
 
 	tick_cleanup_dead_cpu(cpu);
 	rcutree_migrate_callbacks(cpu);

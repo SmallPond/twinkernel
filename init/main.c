@@ -100,6 +100,7 @@
 #include <linux/kcsan.h>
 #include <linux/init_syscalls.h>
 #include <linux/stackdepot.h>
+#include <linux/twin_kernel.h>
 
 #include <asm/io.h>
 #include <asm/bugs.h>
@@ -243,8 +244,16 @@ static int __init quiet_kernel(char *str)
 	return 0;
 }
 
+static int __init twin_kernel(char *str)
+{
+	pr_crit("[DB]: command line tk!\n");
+    is_twin_kernel_boot = 1;
+    return 0;
+}
+
 early_param("debug", debug_kernel);
 early_param("quiet", quiet_kernel);
+early_param("twin_kernel", twin_kernel);
 
 static int __init loglevel(char *str)
 {
@@ -1499,7 +1508,7 @@ void __weak free_initmem(void)
 static int __ref kernel_init(void *unused)
 {
 	int ret;
-
+	tk_hold_starting();
 	/*
 	 * Wait until kthreadd is all set-up.
 	 */

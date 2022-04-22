@@ -9,6 +9,7 @@
 #include "sched.h"
 
 #include <trace/events/power.h>
+#include <linux/twin_kernel.h>
 
 /* Linker adds these: start and end of __cpuidle functions */
 extern char __cpuidle_text_start[], __cpuidle_text_end[];
@@ -285,9 +286,10 @@ static void do_idle(void)
 		local_irq_disable();
 
 		if (cpu_is_offline(cpu)) {
-			tick_nohz_idle_stop_tick();
+			// tick_nohz_idle_stop_tick();
 			cpuhp_report_idle_dead();
-			arch_cpu_idle_dead();
+			tk_start_kernel();
+			// arch_cpu_idle_dead();
 		}
 
 		arch_cpu_idle_enter();

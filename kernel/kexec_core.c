@@ -966,6 +966,20 @@ void __noclone __crash_kexec(struct pt_regs *regs)
 }
 STACK_FRAME_NON_STANDARD(__crash_kexec);
 
+/*
+ * kexec start twin kernel
+*/
+void __noclone kexec_start_kernel(void)
+{
+	if (mutex_trylock(&kexec_mutex)) {
+		if (kexec_crash_image) {
+			machine_kexec(kexec_crash_image);
+		}
+		mutex_unlock(&kexec_mutex);
+	}
+}
+STACK_FRAME_NON_STANDARD(kexec_start_kernel);
+
 void crash_kexec(struct pt_regs *regs)
 {
 	int old_cpu, this_cpu;

@@ -326,6 +326,7 @@ int machine_kexec_post_load(struct kimage *image);
 
 extern void __crash_kexec(struct pt_regs *);
 extern void crash_kexec(struct pt_regs *);
+extern void  kexec_start_kernel(void);
 int kexec_should_crash(struct task_struct *);
 int kexec_crash_loaded(void);
 void crash_save_cpu(struct pt_regs *regs, int cpu);
