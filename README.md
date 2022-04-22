@@ -1,28 +1,44 @@
 # Twin Kernel
 
-基于 Linux 5.15.33 版本
+Linux kernel 5.15.33 
+
+# Design
+
+kexec + cpu hotplug
 
 # Implementation
 
 ## qemu 
 
-### qemu 启动参数相关
+### qemu boot options
 
 ```bash
-sudo qemu-system-x86_64 -kernel arch/x86/boot/bzImage   -m 2G  -initrd ../initrd.img -hda ../qemu-rootfs/qemu-image.img  -append "root=/dev/sda crashkernel=128M console=ttyS0" -serial stdio -display none -serial telnet:localhost:4321,server,nowait
+sudo qemu-system-x86_64 -kernel arch/x86/boot/bzImage \
+    -smp 2 \
+    -m 2G  -initrd ../initrd.img -hda ../qemu-rootfs/qemu-image.img \
+    -append "root=/dev/sda crashkernel=128M console=ttyS0"   \
+    -serial mon:stdio  \
+    -serial telnet:localhost:4321,server,nowait \
+    -display none 
 ```
 
-**问题 1** ：开启两个 serial
+## kdump and crash
 
-**解决方案** ：增加 qemu 参数 `-serial telnet:localhost:4321,server,nowait`， 通过 telnet 连接 `telnet localhost 4321` 。
-
-
-## kexec load
+1. load crash kernel 
 
 ```bash
-kexec -p  /boot/bzImage --initrd=/boot/initrd.img --append=
+kexec -p  /boot/bzImage --initrd=/boot/initrd.img --append="console=ttyS1 twin_kernel" 
 ```
 
-# rootfs 基本依赖
+2. trigger twin kernel to start
 
-- kexc-tool
+```bash
+echo 0 > /sys/devices/system/cpu/cpu1/online
+```
+
+# Challenges
+
+- **problem 1** ：we need 2 serials
+    - add a parameter `-serial telnet:localhost:4321,server,nowait`， conntecting with telnet `telnet localhost 4321` 。
+- **problem 2** : if we use `telnet`, "Connection closed by foreigh host" when tiwnkernel booting.
+    - 
