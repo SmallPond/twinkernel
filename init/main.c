@@ -244,16 +244,8 @@ static int __init quiet_kernel(char *str)
 	return 0;
 }
 
-static int __init twin_kernel(char *str)
-{
-	pr_crit("[DB]: command line tk!\n");
-    is_twin_kernel_boot = 1;
-    return 0;
-}
-
 early_param("debug", debug_kernel);
 early_param("quiet", quiet_kernel);
-early_param("twin_kernel", twin_kernel);
 
 static int __init loglevel(char *str)
 {
@@ -1085,7 +1077,7 @@ asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
 		      panic_param);
 
 	lockdep_init();
-
+	// no effect 
 	/*
 	 * Need to run this when irqs are enabled, because it wants
 	 * to self-test [hard/soft]-irqs on/off lock inversion bugs
@@ -1508,7 +1500,7 @@ void __weak free_initmem(void)
 static int __ref kernel_init(void *unused)
 {
 	int ret;
-	tk_hold_starting();
+
 	/*
 	 * Wait until kthreadd is all set-up.
 	 */

@@ -1,8 +1,17 @@
 #include <linux/twin_kernel.h>
 #include <linux/kexec.h>
+#include <linux/init.h>
 
-int is_twin_kernel_boot = 0;
+int twin_kernel_boot __initdata;
+EXPORT_SYMBOL(twin_kernel_boot);
 
+static int __init twin_kernel(char *str)
+{
+	pr_crit("[DB]: command line tk!\n");
+    twin_kernel_boot = 1;
+    return 0;
+}
+early_param("twin_kernel", twin_kernel);
 
 void tk_start_kernel(void)
 {
@@ -11,9 +20,9 @@ void tk_start_kernel(void)
 
     // no return
 }
-
+ 
 void tk_hold_starting(void)
 {
-    if (is_twin_kernel_boot) 
+    if (twin_kernel_boot) 
         while(1);
 }
