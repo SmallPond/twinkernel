@@ -2,7 +2,7 @@
 #include <linux/kexec.h>
 #include <linux/init.h>
 
-int twin_kernel_boot __initdata;
+int twin_kernel_boot;
 EXPORT_SYMBOL(twin_kernel_boot);
 
 static int __init twin_kernel(char *str)
