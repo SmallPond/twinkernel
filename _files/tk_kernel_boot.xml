@@ -1,0 +1,37 @@
+<domain type='kvm'>
+  <name>tk</name>
+  <uuid>ab953e2f-9d16-4955-bb43-1178230ee625</uuid>
+  <memory unit='KiB'>2097152</memory>
+  <currentMemory unit='KiB'>2097152</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+  <os>
+         <!--qemu-system-x86_64 -M ?-->
+         <type arch='x86_64' machine='pc'>hvm</type>
+         <type>hvm</type>
+         <kernel>/home/db/Workspace/oscomp/bzImage</kernel>
+         <initrd>/home/db/Workspace/oscomp/initrd.img</initrd>
+         <cmdline>console=ttyS0 root=/dev/sda rw crashkernel=256M</cmdline>
+  </os>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+        <emulator>/usr/bin/qemu-system-x86_64</emulator>
+        <serial type='pty'> <target port='0'/> </serial>
+
+        <disk type='file' device='disk'>
+                <source file='/home/db/Workspace/oscomp/qemu-rootfs/qemu-img-5G.img'/>
+                <target dev='hda'/>
+        </disk>
+
+        <interface type='network'>
+                <mac address='52:54:4a:e1:1c:84'/>
+                <source network='default'/>
+                <target dev='vnet1'/>
+                <model type='virtio'/>
+                <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+        </interface>
+
+  </devices>
+</domain>
+           
