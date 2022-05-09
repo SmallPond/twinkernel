@@ -20,27 +20,13 @@
 sudo qemu-system-x86_64 -kernel bzImage \
     -smp 2 \
     --enable-kvm \
-    -m 2G  -initrd ./initrd.img -hda ./qemu-rootfs/qemu-img-5G.img \
+    -m 2G  \
+    -hda ./qemu-rootfs/qemu-img-5G.img \
     -append "root=/dev/sda rw crashkernel=256M console=ttyS0"   \
-    -serial mon:stdio  \
-    -netdev tap,id=tapnet,ifname=tap0 \
-    -device rtl8139,netdev=tapnet \
     -serial telnet:localhost:4321,server,nowait \
-    -display none
-    
+    -vga std
 ```
 
-```
-sudo qemu-system-x86_64  \
-    -smp 2 -m 2G  \
-    --enable-kvm \
-    -drive file=cirros-0.4.0-x86_64-disk.img \
-    -append "root=/dev/sda rw crashkernel=256M console=ttyS0"   \
-    -serial mon:stdio  \
-    -netdev tap,id=tapnet,ifname=tap0,script=no \
-    -device rtl8139,netdev=tapnet \
-    -display none
-```
 
 使用 virsh 启动，virsh 下虚拟机的[配置文件示例可见](_files/tk_kernel_boot.xml)
 
@@ -49,8 +35,13 @@ sudo qemu-system-x86_64  \
 1. load crash kernel 
 
 ```bash
+
 kexec -p  /boot/bzImage --initrd=/boot/initrd.img  \
     --append="console=ttyS1 twin_kernel nr_cpus=1  acpi_irq_nobalance no_ipi_broadcast=1 lapic_timer=1000000 pci_dev_flags=0x8086:0x7010:b,0x8086:0x100e:b,0x1234:0x1111:b,0x8086:0x7000:b,0x8086:0x7113:b,0x8086:0x7010:b,0x8086:0x100e:b,0x1234:0x1111:b,0x8086:0x7000:b,0x8086:0x7113:b"
+
+# new
+kexec -p  /boot/bzImage --initrd=/boot/initrd.cpio.gz \
+--append="console=ttyS0 twin_kernel nr_cpus=1  acpi_irq_nobalance no_ipi_broadcast=1 lapic_timer=1000000 pci_dev_flags=0x8086:0x100e:b,0x8086:0x1237:b,0x8086:0x7000:b,0x8086:0x7010:b,0x8086:0x7113:b,0x1234:0x1111:b"
 ```
 
 2. trigger twin kernel to start
@@ -75,6 +66,12 @@ echo 0 > /sys/devices/system/cpu/cpu1/online
 
 Linux kernel 5.15.33
 
+```
+make defconfig
+make kvm_guest.config
+make -j`nproc`
+```
+
 ## qemu
 
 ```bash
@@ -93,22 +90,13 @@ Copyright (c) 2003-2019 Fabrice Bellard and the QEMU Project developers
 
 ```
 
-## 使用 qemu 制作镜像
+## rootfs 制作
 
-```
-qemu-img create -f raw tk.img 10G
-qemu-system-x86_64 --enable-kvm -m 2048 -smp 2 -hda tk.img -cdrom xxx.iso -boot dc
+mk-qemu-img 相关脚本文件参考[scripts](https://github.com/SmallPond/scripts/tree/master/KernelDev)
 
-```
-
-
-<details>  
-<summary>~~rootfs 制作~~</summary>
-
-
-```
+```bash
 sudo apt install debootstrap
-./mk-qemu-img.sh qemu-img-5G.img 5G
+./mk-qemu-img.sh qemu-img-5G 5G
 
 ./mount-img.sh qemu-img-5G.img
 # lspci
@@ -130,4 +118,3 @@ passwd
 sudo cp /usr/bin/* mount-point.tmp/usr/bin/
 sudo cp /usr/lib/x86_64-linux-gnu/* mount-point.tmp/usr/lib/x86_64-linux-gnu/
 ```
-</details>  
