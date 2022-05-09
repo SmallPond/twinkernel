@@ -105,7 +105,7 @@ make install
 cd busybox-1.33.1的父目录
 mkdir qemu-image
 vim creat_rootfs.sh
-./creat_rootfs.sh
+sudo ./creat_rootfs.sh
 ```
 
 ./creat_rootfs.sh的内容如下：
@@ -124,6 +124,17 @@ if [ ! -d proc ] && [ ! -d sys ] && [ ! -d dev ] && [ ! -d etc/init.d ]; then
     mkdir proc sys dev etc etc/init.d
 fi
 
+# 创建根目录所需的必要文件etc/inittab、etc/init.d/rcS、etc/fstab
+if [ -f etc/inittab ]; then
+    rm etc/inittab
+fi
+echo "::sysinit:/etc/init.d/rcS" > etc/inittab
+echo "::respawn:-/bin/sh" >> etc/inittab
+echo "::askfirst:-/bin/sh" >> etc/inittab
+echo "::cttlaltdel:/bin/umount -a -r" >> etc/inittab
+chmod 755 etc/inittab
+
+
 if [ -f etc/init.d/rcS ]; then
     rm etc/init.d/rcS
 fi
@@ -132,6 +143,25 @@ echo "mount -t proc none /proc" >> etc/init.d/rcS
 echo "mount -t sysfs none /sys" >> etc/init.d/rcS
 echo "/sbin/mdev -s" >> etc/init.d/rcS
 chmod +x etc/init.d/rcS
+
+if [ -f etc/fstab ]; then
+    rm etc/fstab
+fi
+echo "#device mount-point type option dump fsck" > etc/fstab
+echo "proc  /proc proc  defaults 0 0" >> etc/fstab
+echo "temps /tmp  rpoc  defaults 0 0" >> etc/fstab
+echo "none  /tmp  ramfs defaults 0 0" >> etc/fstab
+echo "sysfs /sys  sysfs defaults 0 0" >> etc/fstab
+echo "mdev  /dev  ramfs defaults 0 0" >> etc/fstab
+
+if [ ! -c dev/console ] && [ ! -c dev/null ] && [ ! -c dev/tty1 ]; then
+    cd dev
+    mknod console c 5 1
+    mknod null c 1 3
+    mknod tty1 c 4 1
+    cd ..
+fi
+
 if [ -f ../qemu-image/rootfs.img ]; then
     rm ../qemu-image/rootfs.img
 fi
