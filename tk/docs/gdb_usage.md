@@ -15,11 +15,11 @@
 ```sh
 # .config - Linux/x86 5.15.33 Kernel Configuration
 Kernel hacking  --->
-				Compile-time checks and compiler options  --->
-						[*] Compile the kernel with debug info
+	Compile-time checks and compiler options  --->
+		[*] Compile the kernel with debug info
         Generic Kernel Debugging Instruments  --->
-        		[*] KGDB: kernel debugger  --->
-        				<*>   KGDB: use kgdb over the serial console
+        	[*] KGDB: kernel debugger  --->
+        		<*>   KGDB: use kgdb over the serial console
     -*- Kernel debugging
     
 # save 
