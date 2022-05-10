@@ -1,6 +1,14 @@
 # Twin Kernel
 
-基于双内核的内核热升级方法
+基于双内核的内核热升级方法。[oscomp: proj135-seamless-kernel-upgrade](https://github.com/oscomp/proj135-seamless-kernel-upgrade)
+
+```
+          | ------------------------------------ |
+          |     Kernel  A   |      Kernel B      |
+          |--------------------------------------|
+          |               hardware               |
+          |--------------------------------------|
+```
  
 
 # Design
@@ -36,12 +44,12 @@ sudo qemu-system-x86_64 -kernel bzImage \
 
 ```bash
 
-kexec -p  /boot/bzImage --initrd=/boot/initrd.img  \
-    --append="console=ttyS1 twin_kernel nr_cpus=1  acpi_irq_nobalance no_ipi_broadcast=1 lapic_timer=1000000 pci_dev_flags=0x8086:0x7010:b,0x8086:0x100e:b,0x1234:0x1111:b,0x8086:0x7000:b,0x8086:0x7113:b,0x8086:0x7010:b,0x8086:0x100e:b,0x1234:0x1111:b,0x8086:0x7000:b,0x8086:0x7113:b"
-
-# new
-kexec -p  /boot/bzImage --initrd=/boot/initrd.cpio.gz \
---append="console=ttyS0 twin_kernel nr_cpus=1  acpi_irq_nobalance no_ipi_broadcast=1 lapic_timer=1000000 pci_dev_flags=0x8086:0x100e:b,0x8086:0x1237:b,0x8086:0x7000:b,0x8086:0x7010:b,0x8086:0x7113:b,0x1234:0x1111:b"
+# kexec -p  /boot/bzImage --initrd=/boot/initrd.img  \
+kexec -p  /boot/bzImage --initrd=/boot/rootfs.img  \
+--append="console=ttyS0 twin_kernel nr_cpus=1 \ 
+ acpi_irq_nobalance no_ipi_broadcast=1 lapic_timer=1000000 \
+ rdinit=/linuxrc \
+ pci_dev_flags=0x8086:0x100e:b,0x8086:0x1237:b,0x8086:0x7000:b,0x8086:0x7010:b,0x8086:0x7113:b,0x1234:0x1111:b"
 ```
 
 2. trigger twin kernel to start
@@ -90,15 +98,24 @@ Copyright (c) 2003-2019 Fabrice Bellard and the QEMU Project developers
 
 ```
 
-## rootfs 制作
+## Ubuntu 镜像制作
 
-mk-qemu-img 相关脚本文件参考[scripts](https://github.com/SmallPond/scripts/tree/master/KernelDev)
+1. 基本镜像
+
+基本镜像给 first kernel 使用
 
 ```bash
-sudo apt install debootstrap
-./mk-qemu-img.sh qemu-img-5G 5G
 
-./mount-img.sh qemu-img-5G.img
+SCRIPTS_PATH="./tk/scripts/"
+IMAGE_PATH="./tk/images"
+
+sudo apt install debootstrap
+
+chmod u+x $SCRIPTS_PATH/*.sh
+
+$SCRIPTS_PATH/mk-qemu-img.sh $IMAGE_PATH/qemu-img-5G.img 5G
+
+$SCRIPTS_PATH/mount-img.sh $IMAGE_PATH/qemu-img-5G.img
 # lspci
 sudo cp /usr/bin/lspci mount-point.tmp/usr/bin/
 sudo cp /usr/lib/x86_64-linux-gnu/libpci.so.3 mount-point.tmp/usr/lib/x86_64-linux-gnu/
@@ -112,9 +129,28 @@ apt install init
 # 修改密码
 passwd
 
-./umount-img.sh
+# ctrl+d 退出
+
+$SCRIPTS_PATH/umount-img.sh
 
 # or 直接全拷贝(不推荐)
 sudo cp /usr/bin/* mount-point.tmp/usr/bin/
 sudo cp /usr/lib/x86_64-linux-gnu/* mount-point.tmp/usr/lib/x86_64-linux-gnu/
+```
+
+2. 使用 busybox 制作简单 rootfs 给 second kernel 使用
+
+参考 [BusyBox_Rootfs.md](tk/docs/BusyBox_Rootfs.md)
+
+```bash
+# 待完善
+```
+
+3. 将 Twinkernel 和 rootfs 放置到镜像中
+
+```bash
+
+IMAGE_PATH="./tk/images"
+$SCRIPTS_PATH/install_kernel_to_img.sh $IMAGE_PATH/qemu-img-5G.img
+
 ```
