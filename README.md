@@ -2,6 +2,12 @@
 
 基于双内核的内核热升级方法。[oscomp: proj135-seamless-kernel-upgrade](https://github.com/oscomp/proj135-seamless-kernel-upgrade)
 
+> 如果有一种机制让业务不迁移，直接原地快速地重启系统使用到新的内核，然后迅速让业务继续之前的RIP运行起来的话，整个过程就相对轻量、便捷。这就是原地的内核热升级技术。目前来看业界已经有一些技术探索，总的来说，原地快速内核热升级的核心是两点：数据持久化存储、内核快速启动。前者容易理解，毕竟内核热升级，需要不中断业务执行，比如内核重启前，数据需要保存起来，重启过程中继续复用这部分数据，这部分难度不是太高，不是本课题的重点。本课题重点是后者，即出于业务的downtime时间要求考虑，通常情况下，很多关键业务downtime的时间是要求50～100ms，假设OS服务、业务应用层的状态恢复需要50ms，那么旧内核的shutdown、新内核的加载初始化必须要满足50ms以内，才能满足最终业务进程downtime 50ms~100ms的要求。这个时间要求目前还没有任何一个技术/方案可以做到。
+
+> 目前一个方案是如果第二个内核可以和第一个内核并行运行的话，第二个内核、系统服务初始化时，第一个内核继续运行，之后突然把第一个的多个进程状态、资源逐个切换到第二个内核，这样可以大大缩短downtime的时间。
+
+> 双Linux内核并行执行：
+
 ```
           | ------------------------------------ |
           |     Kernel  A   |      Kernel B      |
@@ -9,7 +15,8 @@
           |               hardware               |
           |--------------------------------------|
 ```
- 
+
+ <img src="tk/docs/tk.png" width = "800" height = "300" alt="Kernel A and Kernel B" align=center />
 
 # Design
 
@@ -30,7 +37,7 @@ sudo qemu-system-x86_64 -kernel bzImage \
     --enable-kvm \
     -m 2G  \
     -hda ./qemu-rootfs/qemu-img-5G.img \
-    -append "root=/dev/sda rw crashkernel=256M console=ttyS0"   \
+    -append "root=/dev/sda rw crashkernel=256M"   \
     -serial telnet:localhost:4321,server,nowait \
     -vga std
 ```
@@ -46,9 +53,8 @@ sudo qemu-system-x86_64 -kernel bzImage \
 
 # kexec -p  /boot/bzImage --initrd=/boot/initrd.img  \
 kexec -p  /boot/bzImage --initrd=/boot/rootfs.img  \
---append="console=ttyS0 twin_kernel nr_cpus=1 \ 
- acpi_irq_nobalance no_ipi_broadcast=1 lapic_timer=1000000 \
- rdinit=/linuxrc \
+--append="console=ttyS0 disableapic twin_kernel nr_cpus=1 \ 
+ acpi_irq_nobalance no_ipi_broadcast=1 rdinit=/linuxrc \
  pci_dev_flags=0x8086:0x100e:b,0x8086:0x1237:b,0x8086:0x7000:b,0x8086:0x7010:b,0x8086:0x7113:b,0x1234:0x1111:b"
 ```
 
