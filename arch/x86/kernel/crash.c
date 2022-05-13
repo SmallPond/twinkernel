@@ -173,6 +173,46 @@ void native_machine_crash_shutdown(struct pt_regs *regs)
 	crash_save_cpu(regs, safe_smp_processor_id());
 }
 
+void tk_machine_crash_shutdown(struct pt_regs *regs)
+{
+
+	/* The kernel is broken so disable interrupts */
+	local_irq_disable();
+
+	// crash_smp_send_stop();
+
+	/*
+	 * VMCLEAR VMCSs loaded on this cpu if needed.
+	 */
+	// cpu_crash_vmclear_loaded_vmcss();
+
+	/* Booting kdump kernel with VMX or SVM enabled won't work,
+	 * because (among other limitations) we can't disable paging
+	 * with the virt flags.
+	 */
+	// cpu_emergency_vmxoff();
+	// cpu_emergency_svm_disable();
+
+	/*
+	 * Disable Intel PT to stop its logging
+	 */
+	// cpu_emergency_stop_pt();
+
+	crash_save_cpu(regs, safe_smp_processor_id());
+
+#ifdef CONFIG_X86_IO_APIC
+	/* Prevent crash_kexec() from deadlocking on ioapic_lock. */
+	ioapic_zap_locks();
+	clear_IO_APIC();
+#endif
+	lapic_shutdown();
+	restore_boot_irq_mode();
+#ifdef CONFIG_HPET_TIMER
+	hpet_disable();
+#endif
+	// crash_save_cpu(regs, safe_smp_processor_id());
+}
+
 #ifdef CONFIG_KEXEC_FILE
 
 static int get_nr_ram_ranges_callback(struct resource *res, void *arg)

@@ -39,7 +39,7 @@
 #include <linux/hugetlb.h>
 #include <linux/objtool.h>
 #include <linux/kmsg_dump.h>
-
+#include <asm/crash.h>
 #include <asm/page.h>
 #include <asm/sections.h>
 
@@ -952,6 +952,7 @@ void __noclone __crash_kexec(struct pt_regs *regs)
 	 * of memory the xchg(&kexec_crash_image) would be
 	 * sufficient.  But since I reuse the memory...
 	 */
+	pr_crit("[TK]: %s: start", __func__);
 	if (mutex_trylock(&kexec_mutex)) {
 		if (kexec_crash_image) {
 			struct pt_regs fixed_regs;
@@ -973,6 +974,8 @@ void __noclone kexec_start_kernel(void)
 {
 	if (mutex_trylock(&kexec_mutex)) {
 		if (kexec_crash_image) {
+			struct pt_regs fixed_regs;
+			tk_machine_crash_shutdown(&fixed_regs);
 			machine_kexec(kexec_crash_image);
 		}
 		mutex_unlock(&kexec_mutex);
