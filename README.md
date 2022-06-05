@@ -61,7 +61,7 @@
 
 详细设计文档参考： [proj135-doc](https://gitlab.eduxiji.net/yart/proj135-doc)
 
-[整体设计与实现](https://images-1258510704.cos.ap-guangzhou.myqcloud.com/img/20220602-image-20220602161021159.png)
+![整体设计与实现](https://images-1258510704.cos.ap-guangzhou.myqcloud.com/img/20220602-image-20220602161021159.png)
 
 1. kexec
 
