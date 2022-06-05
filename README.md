@@ -35,9 +35,9 @@
   - [x] 编译 Linux4.19 与 Linux5.15 内核
   - [x] 构建使用 Linux5.15 内核的 ubuntu 虚拟机（debootstrap）
   - [x] busybox 构建根文件系统rootfs，作为第二个内核的 initramfs
-- [x] kexec机制学习研究
+- [x] kexec 机制学习研究
 - [x] 双内核并存
-  - [x] QEMU 启动虚拟机的时候为虚拟机配置两个串口：Console串口、VGA串口；
+  - [x] QEMU 启动虚拟机的时候为虚拟机配置两种交互方式：Console串口、VGA；
   - [x] 第一个内核执行kexec命令启动第二内核
     - [x] 第一内核为第二内核提前预留好后者能使用的资源（cpu和内存等）
     - [x] 第二内核启动时使用 initramfs 作为根文件系统
@@ -56,7 +56,12 @@
   - [ ] 双内核通信
     - [ ] 第一内核与第二内核之间借助如核间中断等方式互相通信
 
+
 # 设计与实现
+
+详细设计文档参考： [proj135-doc](https://gitlab.eduxiji.net/yart/proj135-doc)
+
+[整体设计与实现](https://images-1258510704.cos.ap-guangzhou.myqcloud.com/img/20220602-image-20220602161021159.png)
 
 1. kexec
 
