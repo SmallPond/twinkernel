@@ -112,16 +112,6 @@ kexec -p  /boot/bzImage --initrd=/boot/rootfs.img  \
 echo 0 > /sys/devices/system/cpu/cpu1/online
 ```
 
-# 设计中的问题和解决方案
-
-- **Problem 1** ：需要 2 个 串口
-    - add a parameter `-serial telnet:localhost:4321,server,nowait`， conntecting with telnet `telnet localhost 4321` 。
-- **Problem 2** : pci device 冲突
-    - 在 pci_scan_single_device() 函数中增加 blacklist 判断
-- **Problem 3** : 串口重初始化
-- 从自编译和制作的 rootfs 启动无法分配 IP 地址
-    -  尝试了 [cirros 镜像方式启动](https://www.voidking.com/dev-libvirt-create-vm/)可动态分配IP，考虑是自制作rootfs的问题，因此抛弃原方式尝试做一个 ubuntu20.04 server 镜像
-
 # 环境配置
 
 ## Linux kernel
