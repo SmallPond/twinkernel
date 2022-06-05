@@ -27,8 +27,7 @@
 
 基本实现效果如下，两个 Terminal 对应了两个不同的内核，实现可同时与两个内核交互。
 
- <img src="https://www.dingmos.com/usr/uploads/2022/06/1614572930.png" width = "800" height = "300" alt="Kernel A and Kernel B" align=center />
- 
+ <img src="https://www.dingmos.com/usr/uploads/2022/06/3227089291.png" width = "800" height = "300" alt="Kernel A and Kernel B" align=center />
  
  # Roadmap
  
